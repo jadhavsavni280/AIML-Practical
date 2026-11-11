@@ -1,0 +1,493 @@
+1ST PRACTICAL
+
+
+# PR1: Intelligent Agents and PEAS Representation
+
+print("===== INTELLIGENT AGENT SYSTEM =====")
+print("1. Chatbot Agent")
+print("2. Smart Home Controller")
+
+choice = int(input("Enter your choice: "))
+
+# CHATBOT INTELLIGENT AGENT
+if choice == 1:
+
+    print("\n--- CHATBOT AGENT ---")
+    print("Hello! I am your Chatbot.")
+
+    while True:
+        user = input("\nYou: ").lower()
+
+        if user == "hello" or user == "hi":
+            print("Bot: Hello! How can I help you?")
+
+        elif user == "how are you":
+            print("Bot: I am fine. Thank you!")
+
+        elif user == "what is your name":
+            print("Bot: I am an Intelligent Chatbot.")
+
+        elif user == "bye":
+            print("Bot: Goodbye! Have a nice day.")
+            break
+
+        else:
+            print("Bot: Sorry, I don't understand.")
+
+# SMART HOME INTELLIGENT AGENT
+elif choice == 2:
+
+    print("\n--- SMART HOME CONTROLLER ---")
+
+    motion = input("Is motion detected? (yes/no): ")
+    temperature = int(input("Enter room temperature: "))
+    security = input("Is security alert detected? (yes/no): ")
+
+    print("\n--- AGENT ACTIONS ---")
+
+    if motion.lower() == "yes":
+        print("Light: ON")
+    else:
+        print("Light: OFF")
+
+    if temperature > 28:
+        print("Fan: ON")
+    else:
+        print("Fan: OFF")
+
+    if security.lower() == "yes":
+        print("Alarm: ON")
+    else:
+        print("Alarm: OFF")
+
+else:
+    print("Invalid choice!")
+
+print("\nAgent Execution Completed.")
+
+
+
+
+3RD PRACTICAL
+
+
+import heapq
+
+graph = {
+    'A': [('B', 1), ('C', 4)],
+    'B': [('D', 2), ('E', 5)],
+    'C': [('E', 1)],
+    'D': [('F', 3)],
+    'E': [('F', 2)],
+    'F': []
+}
+
+heuristic = {
+    'A': 5,
+    'B': 4,
+    'C': 2,
+    'D': 3,
+    'E': 1,
+    'F': 0
+}
+
+
+def greedy_best_first_search(start, goal):
+    priority_queue = []
+
+    heapq.heappush(
+        priority_queue, (heuristic[start], start, [start])
+    )
+
+    visited = set()
+
+    while priority_queue:
+        h, current, path = heapq.heappop(priority_queue)
+
+        if current in visited:
+            continue
+
+        visited.add(current)
+
+        if current == goal:
+            return path
+
+        for neighbor, cost in graph[current]:
+            if neighbor not in visited:
+                heapq.heappush(
+                    priority_queue,
+                    (heuristic[neighbor], neighbor, path + [neighbor])
+                )
+
+    return None
+
+
+def a_star_search(start, goal):
+    priority_queue = []
+
+    heapq.heappush(
+        priority_queue, (heuristic[start], 0, start, [start])
+    )
+
+    visited = set()
+
+    while priority_queue:
+        f, g, current, path = heapq.heappop(priority_queue)
+
+        if current in visited:
+            continue
+
+        visited.add(current)
+
+        if current == goal:
+            return path, g
+
+        for neighbor, cost in graph[current]:
+            if neighbor not in visited:
+                new_g = g + cost
+                new_f = new_g + heuristic[neighbor]
+
+                heapq.heappush(
+                    priority_queue,
+                    (new_f, new_g, neighbor, path + [neighbor])
+                )
+
+    return None, None
+
+
+start = 'A'
+goal = 'F'
+
+greedy_path = greedy_best_first_search(start, goal)
+
+greedy_cost = 0
+
+for i in range(len(greedy_path) - 1):
+    for neighbor, cost in graph[greedy_path[i]]:
+        if neighbor == greedy_path[i + 1]:
+            greedy_cost += cost
+            break
+
+print("Greedy Best First Search")
+print("Path:", " -> ".join(greedy_path))
+print("Path Cost:", greedy_cost)
+
+
+a_star_path, a_star_cost = a_star_search(start, goal)
+
+print("\nA* Search")
+print("Path:", " -> ".join(a_star_path))
+print("Path Cost:", a_star_cost)
+
+
+print("\nComparison")
+
+print("Greedy Best First Search:")
+print("Optimality: No")
+print("Completeness: Yes, for finite graphs with proper visited handling")
+print("Efficiency: Faster in many cases, but depends heavily on heuristic")
+
+print("\nA* Search:")
+print("Optimality: Yes, when the heuristic is admissible")
+print("Completeness: Yes, under standard finite-cost conditions")
+print("Efficiency: Usually better than uninformed search, but uses more memory")
+
+
+8TH PRACTICAL
+
+
+import pandas as pd
+
+from sklearn.datasets import load_iris
+from sklearn.model_selection import train_test_split
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.naive_bayes import GaussianNB
+
+from sklearn.metrics import (
+    accuracy_score,
+    precision_score,
+    recall_score,
+    f1_score,
+    confusion_matrix,
+    classification_report
+)
+
+# Load Iris Dataset
+iris = load_iris()
+
+X = pd.DataFrame(
+    iris.data,
+    columns=iris.feature_names
+)
+
+y = pd.Series(iris.target, name="target")
+
+print("=" * 60)
+print("IRIS DATASET")
+print(X.head())
+
+print("\nDataset Shape:")
+print(X.shape)
+
+print("\nTarget Classes:")
+print(iris.target_names)
+
+
+# Split Dataset
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y,
+    test_size=0.20,
+    random_state=42
+)
+
+print("\nTraining Data Shape:", X_train.shape)
+print("Testing Data Shape :", X_test.shape)
+
+
+# DECISION TREE CLASSIFIER
+decision_tree = DecisionTreeClassifier(
+    criterion="gini",
+    max_depth=4,
+    random_state=42
+)
+
+decision_tree.fit(X_train, y_train)
+
+y_pred_dt = decision_tree.predict(X_test)
+
+dt_accuracy = accuracy_score(y_test, y_pred_dt)
+
+dt_precision = precision_score(
+    y_test, y_pred_dt,
+    average="weighted",
+    zero_division=0
+)
+
+dt_recall = recall_score(
+    y_test, y_pred_dt,
+    average="weighted",
+    zero_division=0
+)
+
+dt_f1 = f1_score(
+    y_test, y_pred_dt,
+    average="weighted",
+    zero_division=0
+)
+
+dt_cm = confusion_matrix(y_test, y_pred_dt)
+
+print("\n" + "=" * 60)
+print("DECISION TREE RESULTS")
+print("=" * 60)
+
+print("Accuracy :", round(dt_accuracy, 4))
+print("Precision:", round(dt_precision, 4))
+print("Recall   :", round(dt_recall, 4))
+print("F1-Score :", round(dt_f1, 4))
+
+print("\nConfusion Matrix:")
+print(dt_cm)
+
+print("\nClassification Report:")
+print(classification_report(
+    y_test,
+    y_pred_dt,
+    target_names=iris.target_names,
+    zero_division=0
+))
+
+
+# NAIVE BAYES CLASSIFIER
+naive_bayes = GaussianNB()
+
+naive_bayes.fit(X_train, y_train)
+
+y_pred_nb = naive_bayes.predict(X_test)
+
+nb_accuracy = accuracy_score(y_test, y_pred_nb)
+
+nb_precision = precision_score(
+    y_test, y_pred_nb,
+    average="weighted",
+    zero_division=0
+)
+
+nb_recall = recall_score(
+    y_test, y_pred_nb,
+    average="weighted",
+    zero_division=0
+)
+
+nb_f1 = f1_score(
+    y_test, y_pred_nb,
+    average="weighted",
+    zero_division=0
+)
+
+nb_cm = confusion_matrix(y_test, y_pred_nb)
+
+print("\n" + "=" * 60)
+print("NAIVE BAYES RESULTS")
+print("=" * 60)
+
+print("Accuracy :", round(nb_accuracy, 4))
+print("Precision:", round(nb_precision, 4))
+print("Recall   :", round(nb_recall, 4))
+print("F1-Score :", round(nb_f1, 4))
+
+print("\nConfusion Matrix:")
+print(nb_cm)
+
+print("\nClassification Report:")
+print(classification_report(
+    y_test,
+    y_pred_nb,
+    target_names=iris.target_names,
+    zero_division=0
+))
+
+
+# MODEL COMPARISON
+comparison = pd.DataFrame({
+    "Model": ["Decision Tree", "Naive Bayes"],
+    "Accuracy": [dt_accuracy, nb_accuracy],
+    "Precision": [dt_precision, nb_precision],
+    "Recall": [dt_recall, nb_recall],
+    "F1-Score": [dt_f1, nb_f1]
+})
+
+print("\n" + "=" * 60)
+print("MODEL COMPARISON")
+print("=" * 60)
+
+print(comparison.round(4).to_string(index=False))
+
+
+# Compare F1 Scores
+if dt_f1 > nb_f1:
+    print("\nBased on F1-Score:")
+    print("Decision Tree has the higher F1-Score.")
+
+elif nb_f1 > dt_f1:
+    print("\nBased on F1-Score:")
+    print("Naive Bayes has the higher F1-Score.")
+
+else:
+    print("\nBoth models have the same F1-Score.")
+
+
+print("\n" + "=" * 60)
+print("PR8 COMPLETED SUCCESSFULLY")
+print("=" * 60)
+
+
+9TH PRACTICAL
+
+
+# PR9: Clustering Techniques (CO4)
+import os
+os.environ["OMP_NUM_THREADS"] = "1"
+os.environ["MKL_NUM_THREADS"] = "1"
+import os
+os.environ["OMP_NUM_THREADS"] = "1"
+
+import pandas as pd
+import matplotlib.pyplot as plt
+
+from sklearn.cluster import KMeans, AgglomerativeClustering
+from sklearn.preprocessing import StandardScaler
+from scipy.cluster.hierarchy import dendrogram, linkage
+
+# Load Mall Customers Dataset
+url = "https://huggingface.co/SezarTheGreat/mall-customer-segmentation-kmeans/resolve/main/Mall_Customers.csv"
+
+df = pd.read_csv(url)
+
+print("MALL CUSTOMERS DATASET")
+print(df.head())
+print("\nDataset Shape:", df.shape)
+
+# Select features for clustering
+X = df[['Annual Income (k$)', 'Spending Score (1-100)']]
+
+# Feature Scaling
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X)
+
+
+# 1. ELBOW METHOD
+wcss = []
+
+for k in range(1, 11):
+    kmeans = KMeans(n_clusters=k, random_state=42, n_init=10)
+    kmeans.fit(X_scaled)
+    wcss.append(kmeans.inertia_)
+
+plt.figure()
+plt.plot(range(1, 11), wcss, marker='o')
+plt.title("Elbow Method")
+plt.xlabel("Number of Clusters")
+plt.ylabel("WCSS")
+plt.show()
+
+
+# 2. K-MEANS CLUSTERING
+kmeans = KMeans(n_clusters=5, random_state=42, n_init=10)
+
+df['KMeans_Cluster'] = kmeans.fit_predict(X_scaled)
+
+print("\nK-Means Cluster Counts:")
+print(df['KMeans_Cluster'].value_counts().sort_index())
+
+plt.figure()
+plt.scatter(X_scaled[:, 0], X_scaled[:, 1],
+            c=df['KMeans_Cluster'])
+plt.title("K-Means Clustering")
+plt.xlabel("Annual Income (Scaled)")
+plt.ylabel("Spending Score (Scaled)")
+plt.show()
+
+
+# 3. DENDROGRAM
+linked = linkage(X_scaled, method='ward')
+
+plt.figure(figsize=(10, 5))
+dendrogram(linked)
+plt.title("Hierarchical Clustering Dendrogram")
+plt.xlabel("Customers")
+plt.ylabel("Distance")
+plt.show()
+
+
+# 4. HIERARCHICAL CLUSTERING
+hc = AgglomerativeClustering(n_clusters=5, linkage='ward')
+
+df['Hierarchical_Cluster'] = hc.fit_predict(X_scaled)
+
+print("\nHierarchical Cluster Counts:")
+print(df['Hierarchical_Cluster'].value_counts().sort_index())
+
+plt.figure()
+plt.scatter(X_scaled[:, 0], X_scaled[:, 1],
+            c=df['Hierarchical_Cluster'])
+plt.title("Hierarchical Clustering")
+plt.xlabel("Annual Income (Scaled)")
+plt.ylabel("Spending Score (Scaled)")
+plt.show()
+
+
+# 5. CLUSTER ANALYSIS
+print("\nK-Means Cluster Analysis:")
+print(df.groupby('KMeans_Cluster')[
+    ['Annual Income (k$)', 'Spending Score (1-100)']
+].mean().round(2))
+
+print("\nHierarchical Cluster Analysis:")
+print(df.groupby('Hierarchical_Cluster')[
+    ['Annual Income (k$)', 'Spending Score (1-100)']
+].mean().round(2))
+
+print("\nPR9 COMPLETED SUCCESSFULLY")
+
+
