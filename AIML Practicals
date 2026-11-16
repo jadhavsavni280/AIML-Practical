@@ -65,14 +65,82 @@ else:
 
 print("\nAgent Execution Completed.")
 
+2ND PRACTICAL
 
+from collections import deque
+import time
+graph = {
+    'A': ['B', 'C'],
+    'B': ['D', 'E'],
+    'C': ['F', 'G'],
+    'D': ['H', 'I'],
+    'E': ['J'],
+    'F': [],
+    'G': [],
+    'H': [],
+    'I': [],
+    'J': []
+}
+def bfs(graph, start, goal):
+    queue = deque()
+    queue.append((start, [start]))
+    visited = set()
+    explored = []
+    while queue:
+        current, path = queue.popleft()
+        if current in visited:
+            continue
+        visited.add(current)
+        explored.append(current)
+        if current == goal:
+            return path, explored
+        for neighbour in graph[current]:
+            if neighbour not in visited:
+                queue.append((neighbour, path + [neighbour]))
+    return None, explored
+def dfs(graph, start, goal):
+    stack = []
+    stack.append((start, [start]))
+    visited = set()
+    explored = []
+    while stack:
+        current, path = stack.pop()
+        if current in visited:
+            continue
+        visited.add(current)
+        explored.append(current)
+        if current == goal:
+            return path, explored
+        for neighbour in reversed(graph[current]):
+            if neighbour not in visited:
+                stack.append((neighbour, path + [neighbour]))
+    return None, explored
+start = 'A'
+goal = 'J'
+start_time = time.perf_counter()
+bfs_path, bfs_explored = bfs(graph, start, goal)
+bfs_time = time.perf_counter() - start_time
+start_time = time.perf_counter()
+dfs_path, dfs_explored = dfs(graph, start, goal)
+dfs_time = time.perf_counter() - start_time
+print("\n===== BFS RESULT =====")
+print("Traversal:", " -> ".join(bfs_explored))
+print("Path:", " -> ".join(bfs_path))
+print("Path Length:", len(bfs_path) - 1)
+print("Nodes Explored:", len(bfs_explored))
+print("Execution Time:", bfs_time, "seconds")
+print("\n===== DFS RESULT =====")
+print("Traversal:", " -> ".join(dfs_explored))
+print("Path:", " -> ".join(dfs_path))
+print("Path Length:", len(dfs_path) - 1)
+print("Nodes Explored:", len(dfs_explored))
+print("Execution Time:", dfs_time, "seconds")
 
 
 3RD PRACTICAL
 
 
 import heapq
-
 graph = {
     'A': [('B', 1), ('C', 4)],
     'B': [('D', 2), ('E', 5)],
@@ -81,7 +149,6 @@ graph = {
     'E': [('F', 2)],
     'F': []
 }
-
 heuristic = {
     'A': 5,
     'B': 4,
@@ -90,15 +157,11 @@ heuristic = {
     'E': 1,
     'F': 0
 }
-
-
 def greedy_best_first_search(start, goal):
     priority_queue = []
-
     heapq.heappush(
         priority_queue, (heuristic[start], start, [start])
     )
-
     visited = set()
 
     while priority_queue:
@@ -120,8 +183,6 @@ def greedy_best_first_search(start, goal):
                 )
 
     return None
-
-
 def a_star_search(start, goal):
     priority_queue = []
 
@@ -153,8 +214,6 @@ def a_star_search(start, goal):
                 )
 
     return None, None
-
-
 start = 'A'
 goal = 'F'
 
@@ -171,38 +230,421 @@ for i in range(len(greedy_path) - 1):
 print("Greedy Best First Search")
 print("Path:", " -> ".join(greedy_path))
 print("Path Cost:", greedy_cost)
-
-
 a_star_path, a_star_cost = a_star_search(start, goal)
 
 print("\nA* Search")
 print("Path:", " -> ".join(a_star_path))
 print("Path Cost:", a_star_cost)
-
-
 print("\nComparison")
-
 print("Greedy Best First Search:")
 print("Optimality: No")
 print("Completeness: Yes, for finite graphs with proper visited handling")
 print("Efficiency: Faster in many cases, but depends heavily on heuristic")
-
 print("\nA* Search:")
 print("Optimality: Yes, when the heuristic is admissible")
 print("Completeness: Yes, under standard finite-cost conditions")
 print("Efficiency: Usually better than uninformed search, but uses more memory")
+
+4TH PRACTICAL
+
+facts = {
+    "fever",
+    "cough",
+    "body_pain"
+}
+rules = [
+    (["fever", "cough"], "flu"),
+    (["flu", "body_pain"], "viral_infection"),
+    (["viral_infection"], "take_rest"),
+    (["viral_infection", "fever"], "consult_doctor")
+]
+def forward_chaining(facts, rules):
+    known_facts = set(facts)
+
+    print("\n===== FORWARD CHAINING =====")
+    print("Initial Facts:", known_facts)
+
+    while True:
+        new_fact = False
+
+        for conditions, conclusion in rules:
+            if all(condition in known_facts for condition in conditions):
+                if conclusion not in known_facts:
+                    known_facts.add(conclusion)
+                    print("Rule Fired:", conditions, "->", conclusion)
+                    new_fact = True
+
+        if not new_fact:
+            break
+
+    print("Final Facts:", known_facts)
+    return known_facts
+def backward_chaining(goal, facts, rules, visited=None):
+    if visited is None:
+        visited = set()
+    if goal in facts:
+        print("Fact found:", goal)
+        return True
+    if goal in visited:
+        return False
+
+    visited.add(goal)
+    print("Trying to prove:", goal)
+
+    for conditions, conclusion in rules:
+        if conclusion == goal:
+            print("Checking Rule:", conditions, "->", conclusion)
+
+            for condition in conditions:
+                if not backward_chaining(condition, facts, rules, visited):
+                    return False
+
+            print("Goal proved:", goal)
+            return True
+
+    print("Cannot prove:", goal)
+    return False
+print("======================================")
+print("     RULE-BASED EXPERT SYSTEM")
+print("======================================")
+
+print("\nInitial Facts:")
+for fact in sorted(facts):
+    print("-", fact)
+
+print("\nKnowledge Base (Rules):")
+for conditions, conclusion in rules:
+    print(conditions, "->", conclusion)
+derived_facts = forward_chaining(facts, rules)
+print("\n===== BACKWARD CHAINING =====")
+goal = "take_rest"
+print("Goal:", goal)
+if backward_chaining(goal, facts, rules):
+    print("\nDecision: YES")
+    print("The goal can be proved.")
+else:
+    print("\nDecision: NO")
+    print("The goal cannot be proved.")
+
+
+5TH PRACTICAL
+
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler, LabelEncoder
+
+df = sns.load_dataset("titanic")
+
+print("First 5 rows of the dataset:")
+print(df.head())
+
+print("\nDataset Shape:")
+print(df.shape)
+
+print("\nDataset Information:")
+print(df.info())
+
+print("\nMissing Values:")
+print(df.isnull().sum())
+
+df = df.drop_duplicates()
+
+print("\nShape after removing duplicates:")
+print(df.shape)
+
+df["age"] = df["age"].fillna(df["age"].median())
+df["embarked"] = df["embarked"].fillna(df["embarked"].mode()[0])
+
+df["embark_town"] = df["embark_town"].fillna(
+    df["embark_town"].mode()[0]
+)
+
+df["deck"] = df["deck"].astype("object").fillna("Unknown")
+
+print("\nMissing Values After Handling:")
+print(df.isnull().sum())
+
+print("\nStatistical Analysis:")
+print(df[["age", "fare", "sibsp", "parch"]].describe())
+
+print("\nMean:")
+print(df[["age", "fare"]].mean())
+
+print("\nMedian:")
+print(df[["age", "fare"]].median())
+
+print("\nStandard Deviation:")
+print(df[["age", "fare"]].std())
+
+label_encoder = LabelEncoder()
+
+df["sex_encoded"] = label_encoder.fit_transform(df["sex"])
+
+print("\nLabel Encoding of Sex:")
+print(df[["sex", "sex_encoded"]].head())
+
+df = pd.get_dummies(
+    df,
+    columns=["embarked"],
+    drop_first=True
+)
+
+print("\nAfter One-Hot Encoding:")
+print(df.head())
+
+scaler = StandardScaler()
+
+df[["age", "fare"]] = scaler.fit_transform(
+    df[["age", "fare"]]
+)
+
+print("\nScaled Features:")
+print(df[["age", "fare"]].head())
+
+plt.figure(figsize=(12, 5))
+
+plt.subplot(1, 2, 1)
+plt.hist(df["age"], bins=20, edgecolor="black")
+plt.title("Histogram of Age")
+plt.xlabel("Age")
+plt.ylabel("Frequency")
+
+plt.subplot(1, 2, 2)
+plt.hist(df["fare"], bins=20, edgecolor="black")
+plt.title("Histogram of Fare")
+plt.xlabel("Fare")
+plt.ylabel("Frequency")
+
+plt.tight_layout()
+plt.show()
+
+plt.figure(figsize=(10, 5))
+
+plt.subplot(1, 2, 1)
+sns.boxplot(y=df["age"])
+plt.title("Boxplot of Age")
+
+plt.subplot(1, 2, 2)
+sns.boxplot(y=df["fare"])
+plt.title("Boxplot of Fare")
+
+plt.tight_layout()
+plt.show()
+
+features = [
+    "pclass", "age", "sibsp", "parch", "fare",
+    "sex_encoded", "embarked_Q", "embarked_S"
+]
+
+X = df[features]
+y = df["survived"]
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X,
+    y,
+    test_size=0.20,
+    random_state=42,
+    stratify=y
+)
+print("\nTraining Data Shape:")
+print(X_train.shape)
+print("\nTesting Data Shape:")
+print(X_test.shape)
+print("\nTraining Target Shape:")
+print(y_train.shape)
+print("\nTesting Target Shape:")
+print(y_test.shape)
+print("DATA PREPROCESSING COMPLETED SUCCESSFULLY")
+
+
+6TH PRACTICAL
+
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.datasets import fetch_california_housing
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler, PolynomialFeatures
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
+
+data = fetch_california_housing(as_frame=True)
+
+X = data.data
+y = data.target
+
+print("First 5 rows of the dataset:")
+print(X.head())
+
+print("\nDataset Shape:")
+print(X.shape)
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.20, random_state=42
+)
+scaler = StandardScaler()
+
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+linear_model = LinearRegression()
+linear_model.fit(X_train_scaled, y_train)
+
+y_pred_linear = linear_model.predict(X_test_scaled)
+linear_mse = mean_squared_error(y_test, y_pred_linear)
+linear_mae = mean_absolute_error(y_test, y_pred_linear)
+linear_r2 = r2_score(y_test, y_pred_linear)
+poly = PolynomialFeatures(degree=2)
+
+X_train_poly = poly.fit_transform(X_train_scaled)
+X_test_poly = poly.transform(X_test_scaled)
+poly_model = LinearRegression()
+poly_model.fit(X_train_poly, y_train)
+y_pred_poly = poly_model.predict(X_test_poly)
+poly_mse = mean_squared_error(y_test, y_pred_poly)
+poly_mae = mean_absolute_error(y_test, y_pred_poly)
+poly_r2 = r2_score(y_test, y_pred_poly)
+print("\n===== LINEAR REGRESSION RESULTS =====")
+print("Mean Squared Error:", linear_mse)
+print("Mean Absolute Error:", linear_mae)
+print("R2 Score:", linear_r2)
+print("\n===== POLYNOMIAL REGRESSION RESULTS =====")
+print("Mean Squared Error:", poly_mse)
+print("Mean Absolute Error:", poly_mae)
+print("R2 Score:", poly_r2)
+comparison = pd.DataFrame({
+    "Model": ["Linear Regression", "Polynomial Regression"],
+    "MSE": [linear_mse, poly_mse],
+    "MAE": [linear_mae, poly_mae],
+    "R2 Score": [linear_r2, poly_r2]
+})
+print("\n===== MODEL COMPARISON =====")
+print(comparison)
+plt.figure(figsize=(12, 5))
+plt.subplot(1, 2, 1)
+plt.scatter(y_test, y_pred_linear, alpha=0.5)
+plt.xlabel("Actual Values")
+plt.ylabel("Predicted Values")
+plt.title("Linear Regression")
+plt.subplot(1, 2, 2)
+plt.scatter(y_test, y_pred_poly, alpha=0.5)
+plt.xlabel("Actual Values")
+plt.ylabel("Predicted Values")
+plt.title("Polynomial Regression")
+plt.tight_layout()
+plt.show()
+if poly_r2 > linear_r2:
+    print("\nPolynomial Regression performs better.")
+else:
+    print("\nLinear Regression performs better.")
+
+
+7TH PRACTICAL
+
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.datasets import load_breast_cancer
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LogisticRegression
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.metrics import (
+    accuracy_score, precision_score, recall_score,
+    f1_score, confusion_matrix, ConfusionMatrixDisplay
+)
+data = load_breast_cancer()
+X = pd.DataFrame(data.data, columns=data.feature_names)
+y = data.target
+print("First 5 rows of Dataset:")
+print(X.head())
+
+print("\nDataset Shape:")
+print(X.shape)
+X = X.fillna(X.mean())
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.20, random_state=42, stratify=y
+)
+scaler = StandardScaler()
+
+X_train = scaler.fit_transform(X_train)
+X_test = scaler.transform(X_test)
+
+lr = LogisticRegression(max_iter=1000)
+lr.fit(X_train, y_train)
+
+y_pred_lr = lr.predict(X_test)
+knn = KNeighborsClassifier(n_neighbors=5)
+knn.fit(X_train, y_train)
+
+y_pred_knn = knn.predict(X_test)
+def evaluate_model(y_test, y_pred, model_name):
+    print("\n=====", model_name, "=====")
+
+    print("Accuracy:", accuracy_score(y_test, y_pred))
+    print("Precision:", precision_score(y_test, y_pred))
+    print("Recall:", recall_score(y_test, y_pred))
+    print("F1 Score:", f1_score(y_test, y_pred))
+    cm = confusion_matrix(y_test, y_pred)
+    print("Confusion Matrix:\n", cm)
+
+    return cm
+cm_lr = evaluate_model(y_test, y_pred_lr, "LOGISTIC REGRESSION")
+
+cm_knn = evaluate_model(y_test, y_pred_knn, "KNN")
+results = pd.DataFrame({
+    "Model": ["Logistic Regression", "KNN"],
+    "Accuracy": [
+        accuracy_score(y_test, y_pred_lr),
+        accuracy_score(y_test, y_pred_knn)
+    ],
+    "Precision": [
+        precision_score(y_test, y_pred_lr),
+        precision_score(y_test, y_pred_knn)
+    ],
+    "Recall": [
+        recall_score(y_test, y_pred_lr),
+        recall_score(y_test, y_pred_knn)
+    ],
+    "F1 Score": [
+        f1_score(y_test, y_pred_lr),
+        f1_score(y_test, y_pred_knn)
+    ]
+})
+
+print("\n===== MODEL COMPARISON =====")
+print(results)
+fig, ax = plt.subplots(1, 2, figsize=(10, 4))
+ConfusionMatrixDisplay(
+    cm_lr, display_labels=data.target_names
+).plot(ax=ax[0], colorbar=False)
+ax[0].set_title("Logistic Regression")
+ConfusionMatrixDisplay(
+    cm_knn, display_labels=data.target_names
+).plot(ax=ax[1], colorbar=False)
+ax[1].set_title("KNN")
+plt.tight_layout()
+plt.show()
+if accuracy_score(y_test, y_pred_lr) > accuracy_score(y_test, y_pred_knn):
+    print("\nLogistic Regression performs better.")
+elif accuracy_score(y_test, y_pred_lr) < accuracy_score(y_test, y_pred_knn):
+    print("\nKNN performs better.")
+else:
+    print("\nBoth models have equal accuracy.")
+
 
 
 8TH PRACTICAL
 
 
 import pandas as pd
-
 from sklearn.datasets import load_iris
 from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.naive_bayes import GaussianNB
-
 from sklearn.metrics import (
     accuracy_score,
     precision_score,
@@ -212,14 +654,12 @@ from sklearn.metrics import (
     classification_report
 )
 
-# Load Iris Dataset
 iris = load_iris()
 
 X = pd.DataFrame(
     iris.data,
     columns=iris.feature_names
 )
-
 y = pd.Series(iris.target, name="target")
 
 print("=" * 60)
@@ -231,20 +671,13 @@ print(X.shape)
 
 print("\nTarget Classes:")
 print(iris.target_names)
-
-
-# Split Dataset
 X_train, X_test, y_train, y_test = train_test_split(
     X, y,
     test_size=0.20,
     random_state=42
 )
-
 print("\nTraining Data Shape:", X_train.shape)
 print("Testing Data Shape :", X_test.shape)
-
-
-# DECISION TREE CLASSIFIER
 decision_tree = DecisionTreeClassifier(
     criterion="gini",
     max_depth=4,
@@ -252,43 +685,34 @@ decision_tree = DecisionTreeClassifier(
 )
 
 decision_tree.fit(X_train, y_train)
-
 y_pred_dt = decision_tree.predict(X_test)
-
 dt_accuracy = accuracy_score(y_test, y_pred_dt)
-
 dt_precision = precision_score(
     y_test, y_pred_dt,
     average="weighted",
     zero_division=0
 )
-
 dt_recall = recall_score(
     y_test, y_pred_dt,
     average="weighted",
     zero_division=0
 )
-
 dt_f1 = f1_score(
     y_test, y_pred_dt,
     average="weighted",
     zero_division=0
 )
-
 dt_cm = confusion_matrix(y_test, y_pred_dt)
 
 print("\n" + "=" * 60)
 print("DECISION TREE RESULTS")
 print("=" * 60)
-
 print("Accuracy :", round(dt_accuracy, 4))
 print("Precision:", round(dt_precision, 4))
 print("Recall   :", round(dt_recall, 4))
 print("F1-Score :", round(dt_f1, 4))
-
 print("\nConfusion Matrix:")
 print(dt_cm)
-
 print("\nClassification Report:")
 print(classification_report(
     y_test,
@@ -296,23 +720,15 @@ print(classification_report(
     target_names=iris.target_names,
     zero_division=0
 ))
-
-
-# NAIVE BAYES CLASSIFIER
 naive_bayes = GaussianNB()
-
 naive_bayes.fit(X_train, y_train)
-
 y_pred_nb = naive_bayes.predict(X_test)
-
 nb_accuracy = accuracy_score(y_test, y_pred_nb)
-
 nb_precision = precision_score(
     y_test, y_pred_nb,
     average="weighted",
     zero_division=0
 )
-
 nb_recall = recall_score(
     y_test, y_pred_nb,
     average="weighted",
@@ -324,21 +740,16 @@ nb_f1 = f1_score(
     average="weighted",
     zero_division=0
 )
-
 nb_cm = confusion_matrix(y_test, y_pred_nb)
-
 print("\n" + "=" * 60)
 print("NAIVE BAYES RESULTS")
 print("=" * 60)
-
 print("Accuracy :", round(nb_accuracy, 4))
 print("Precision:", round(nb_precision, 4))
 print("Recall   :", round(nb_recall, 4))
 print("F1-Score :", round(nb_f1, 4))
-
 print("\nConfusion Matrix:")
 print(nb_cm)
-
 print("\nClassification Report:")
 print(classification_report(
     y_test,
@@ -346,9 +757,6 @@ print(classification_report(
     target_names=iris.target_names,
     zero_division=0
 ))
-
-
-# MODEL COMPARISON
 comparison = pd.DataFrame({
     "Model": ["Decision Tree", "Naive Bayes"],
     "Accuracy": [dt_accuracy, nb_accuracy],
@@ -362,9 +770,6 @@ print("MODEL COMPARISON")
 print("=" * 60)
 
 print(comparison.round(4).to_string(index=False))
-
-
-# Compare F1 Scores
 if dt_f1 > nb_f1:
     print("\nBased on F1-Score:")
     print("Decision Tree has the higher F1-Score.")
@@ -375,17 +780,12 @@ elif nb_f1 > dt_f1:
 
 else:
     print("\nBoth models have the same F1-Score.")
-
-
 print("\n" + "=" * 60)
 print("PR8 COMPLETED SUCCESSFULLY")
 print("=" * 60)
 
 
 9TH PRACTICAL
-
-
-# PR9: Clustering Techniques (CO4)
 import os
 os.environ["OMP_NUM_THREADS"] = "1"
 os.environ["MKL_NUM_THREADS"] = "1"
@@ -411,12 +811,8 @@ print("\nDataset Shape:", df.shape)
 # Select features for clustering
 X = df[['Annual Income (k$)', 'Spending Score (1-100)']]
 
-# Feature Scaling
 scaler = StandardScaler()
 X_scaled = scaler.fit_transform(X)
-
-
-# 1. ELBOW METHOD
 wcss = []
 
 for k in range(1, 11):
@@ -430,9 +826,6 @@ plt.title("Elbow Method")
 plt.xlabel("Number of Clusters")
 plt.ylabel("WCSS")
 plt.show()
-
-
-# 2. K-MEANS CLUSTERING
 kmeans = KMeans(n_clusters=5, random_state=42, n_init=10)
 
 df['KMeans_Cluster'] = kmeans.fit_predict(X_scaled)
@@ -447,9 +840,6 @@ plt.title("K-Means Clustering")
 plt.xlabel("Annual Income (Scaled)")
 plt.ylabel("Spending Score (Scaled)")
 plt.show()
-
-
-# 3. DENDROGRAM
 linked = linkage(X_scaled, method='ward')
 
 plt.figure(figsize=(10, 5))
@@ -458,13 +848,8 @@ plt.title("Hierarchical Clustering Dendrogram")
 plt.xlabel("Customers")
 plt.ylabel("Distance")
 plt.show()
-
-
-# 4. HIERARCHICAL CLUSTERING
 hc = AgglomerativeClustering(n_clusters=5, linkage='ward')
-
 df['Hierarchical_Cluster'] = hc.fit_predict(X_scaled)
-
 print("\nHierarchical Cluster Counts:")
 print(df['Hierarchical_Cluster'].value_counts().sort_index())
 
@@ -475,19 +860,156 @@ plt.title("Hierarchical Clustering")
 plt.xlabel("Annual Income (Scaled)")
 plt.ylabel("Spending Score (Scaled)")
 plt.show()
-
-
-# 5. CLUSTER ANALYSIS
 print("\nK-Means Cluster Analysis:")
 print(df.groupby('KMeans_Cluster')[
     ['Annual Income (k$)', 'Spending Score (1-100)']
 ].mean().round(2))
-
 print("\nHierarchical Cluster Analysis:")
 print(df.groupby('Hierarchical_Cluster')[
     ['Annual Income (k$)', 'Spending Score (1-100)']
 ].mean().round(2))
-
 print("\nPR9 COMPLETED SUCCESSFULLY")
 
+
+10TH PRACTICAL
+
+import matplotlib.pyplot as plt
+from sklearn.datasets import load_breast_cancer
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score
+data = load_breast_cancer()
+X = data.data
+y = data.target
+print("Original Number of Features:", X.shape[1])
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.20, random_state=42, stratify=y
+)
+scaler = StandardScaler()
+X_train = scaler.fit_transform(X_train)
+X_test = scaler.transform(X_test)
+
+# Classification Before PCA
+model = LogisticRegression(max_iter=1000)
+model.fit(X_train, y_train)
+
+y_pred = model.predict(X_test)
+accuracy_before = accuracy_score(y_test, y_pred)
+pca = PCA(n_components=2)
+X_train_pca = pca.fit_transform(X_train)
+X_test_pca = pca.transform(X_test)
+print("Number of Features After PCA:", X_train_pca.shape[1])
+pca_model = LogisticRegression(max_iter=1000)
+pca_model.fit(X_train_pca, y_train)
+y_pred_pca = pca_model.predict(X_test_pca)
+accuracy_after = accuracy_score(y_test, y_pred_pca)
+print("\n===== CLASSIFICATION PERFORMANCE =====")
+print("Accuracy Before PCA:", accuracy_before)
+print("Accuracy After PCA:", accuracy_after)
+print("\nExplained Variance Ratio:")
+print(pca.explained_variance_ratio_)
+print("Total Explained Variance:",
+      sum(pca.explained_variance_ratio_))
+plt.figure(figsize=(8, 5))
+plt.scatter(
+    X_train_pca[:, 0],
+    X_train_pca[:, 1],
+    c=y_train,
+    cmap="viridis",
+    alpha=0.7
+)
+plt.xlabel("Principal Component 1")
+plt.ylabel("Principal Component 2")
+plt.title("PCA - 2D Visualization")
+plt.colorbar(label="Class")
+plt.show()
+print("\nPCA IMPLEMENTED SUCCESSFULLY")
+
+
+11TH PRACTICAL
+
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.datasets import load_breast_cancer
+from sklearn.model_selection import train_test_split, cross_val_score, GridSearchCV
+from sklearn.preprocessing import StandardScaler
+from sklearn.svm import SVC
+from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
+data = load_breast_cancer()
+X = data.data
+y = data.target
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42, stratify=y
+)
+
+# Feature Scaling (required for SVM)
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+models = {
+    "SVM": SVC(),
+    "Random Forest": RandomForestClassifier(random_state=42),
+    "AdaBoost": AdaBoostClassifier(random_state=42)
+}
+params = {
+    "SVM": {
+        "C": [0.1, 1, 10],
+        "kernel": ["linear", "rbf"]
+    },
+    "Random Forest": {
+        "n_estimators": [50, 100],
+        "max_depth": [None, 5, 10]
+    },
+    "AdaBoost": {
+        "n_estimators": [50, 100],
+        "learning_rate": [0.5, 1.0]
+    }
+}
+results = []
+for name, model in models.items():
+    if name == "SVM":
+        Xtr = X_train_scaled
+        Xte = X_test_scaled
+    else:
+        Xtr = X_train
+        Xte = X_test
+    model.fit(Xtr, y_train)
+    y_pred = model.predict(Xte)
+    before_accuracy = accuracy_score(y_test, y_pred)
+    cv_scores = cross_val_score(model, Xtr, y_train, cv=5, scoring="accuracy")
+    grid = GridSearchCV(
+        model, params[name], cv=5, scoring="accuracy", n_jobs=-1
+    )
+    grid.fit(Xtr, y_train)
+    best_model = grid.best_estimator_
+    y_pred_tuned = best_model.predict(Xte)
+    after_accuracy = accuracy_score(y_test, y_pred_tuned)
+    results.append({
+        "Model": name,
+        "Before Accuracy": before_accuracy,
+        "CV Accuracy": cv_scores.mean(),
+        "After Accuracy": after_accuracy,
+        "Precision": precision_score(y_test, y_pred_tuned),
+        "Recall": recall_score(y_test, y_pred_tuned),
+        "F1 Score": f1_score(y_test, y_pred_tuned),
+        "Best Parameters": grid.best_params_
+    })
+result_df = pd.DataFrame(results)
+print("\nModel Performance Comparison:")
+print(result_df.to_string(index=False))
+result_df.plot(
+    x="Model",
+    y=["Before Accuracy", "After Accuracy"],
+    kind="bar",
+    figsize=(9, 5)
+)
+plt.title("Model Performance Before and After Optimization")
+plt.ylabel("Accuracy")
+plt.ylim(0, 1.1)
+plt.xticks(rotation=0)
+plt.tight_layout()
+plt.show()
 
