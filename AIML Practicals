@@ -245,6 +245,8 @@ print("Optimality: Yes, when the heuristic is admissible")
 print("Completeness: Yes, under standard finite-cost conditions")
 print("Efficiency: Usually better than uninformed search, but uses more memory")
 
+
+
 4TH PRACTICAL
 
 facts = {
@@ -325,6 +327,8 @@ if backward_chaining(goal, facts, rules):
 else:
     print("\nDecision: NO")
     print("The goal cannot be proved.")
+
+
 
 
 5TH PRACTICAL
@@ -461,6 +465,8 @@ print(y_test.shape)
 print("DATA PREPROCESSING COMPLETED SUCCESSFULLY")
 
 
+
+
 6TH PRACTICAL
 
 import numpy as np
@@ -540,6 +546,7 @@ if poly_r2 > linear_r2:
     print("\nPolynomial Regression performs better.")
 else:
     print("\nLinear Regression performs better.")
+
 
 
 7TH PRACTICAL
@@ -785,7 +792,10 @@ print("PR8 COMPLETED SUCCESSFULLY")
 print("=" * 60)
 
 
+
 9TH PRACTICAL
+
+
 import os
 os.environ["OMP_NUM_THREADS"] = "1"
 os.environ["MKL_NUM_THREADS"] = "1"
@@ -871,6 +881,7 @@ print(df.groupby('Hierarchical_Cluster')[
 print("\nPR9 COMPLETED SUCCESSFULLY")
 
 
+
 10TH PRACTICAL
 
 import matplotlib.pyplot as plt
@@ -926,6 +937,7 @@ plt.title("PCA - 2D Visualization")
 plt.colorbar(label="Class")
 plt.show()
 print("\nPCA IMPLEMENTED SUCCESSFULLY")
+
 
 
 11TH PRACTICAL
